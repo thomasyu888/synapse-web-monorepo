@@ -35,6 +35,7 @@ import {
   getDefaultColumnHandlers,
   getHandlersForTableQuery,
 } from './handlers/tableQueryHandlers'
+import { getTableLineageHandlers } from './handlers/tableLineageHandlers'
 import getAllTeamHandlers from './handlers/teamHandlers'
 import {
   getCurrentUserCertifiedValidatedHandler,
@@ -101,6 +102,7 @@ export function getHandlersForStorybook(
     ),
     featureFlags: [getFeatureFlagsOverride({ portalOrigin })],
     tableQuery: getHandlersForTableQuery(backendOrigin),
+    tableLineage: getTableLineageHandlers(backendOrigin),
     doi: getDoiHandler(backendOrigin),
     shortIo: getShortIoHandlers(),
     search: getHandlersForSearchQuery(backendOrigin),

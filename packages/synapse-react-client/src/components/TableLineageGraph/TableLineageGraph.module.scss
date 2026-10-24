@@ -1,0 +1,74 @@
+.container {
+  width: 100%;
+}
+
+.node:global(.react-flow__node) {
+  padding: 8px 10px;
+  border: 1px solid var(--synapse-gray-400);
+  border-radius: 6px;
+  background: var(--synapse-white, #fff);
+  text-align: left;
+  white-space: normal;
+}
+
+.clickable:global(.react-flow__node) {
+  cursor: pointer !important;
+}
+
+.rootNode:global(.react-flow__node) {
+  border: 2px solid var(--synapse-primary-action-color);
+  box-shadow: 0 0 0 3px var(--synapse-primary-100);
+}
+
+.unreadableNode:global(.react-flow__node) {
+  border-style: dashed;
+  color: var(--synapse-gray-600);
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nodeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nodeId {
+  color: var(--synapse-gray-600);
+  font-size: 12px;
+}
+
+.nodeFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.nodeChangedOn {
+  margin-top: 4px;
+  color: var(--synapse-gray-600);
+  font-size: 12px;
+}
+
+@keyframes changedFlash {
+  0% {
+    background-color: var(--synapse-warning);
+    box-shadow: 0 0 0 6px var(--synapse-warning);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.recentlyChanged {
+  border-radius: 4px;
+  animation: changedFlash 2s ease-out 1;
+}

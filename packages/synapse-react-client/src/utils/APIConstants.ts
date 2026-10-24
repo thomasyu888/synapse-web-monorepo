@@ -63,6 +63,9 @@ export const ENTITY_SCHEMA_VALIDATION = (id: string | number) =>
 export const ENTITY_ACCESS_REQUIREMENTS = (entityId: string | number) =>
   `${ENTITY_ID(entityId)}/accessRequirement`
 
+export const TABLE_LINEAGE = (id: string | number) =>
+  `${ENTITY_ID(id)}/table/lineage`
+
 export const TABLE_QUERY_ASYNC_START = (id: string | number) =>
   `${ENTITY_ID(id)}/table/query/async/start`
 

@@ -206,6 +206,10 @@ const SynapseComponents = {
     () =>
       import('./components/SqlDefinedTableEditor/SqlDefinedTableEditorModal'),
   ),
+  SqlWorksheet: lazy(() => import('./components/SqlWorksheet/SqlWorksheet')),
+  SqlWorksheetPage: lazy(
+    () => import('./components/SqlWorksheet/SqlWorksheetPage'),
+  ),
   StandaloneQueryWrapper: lazy(
     () => import('./components/StandaloneQueryWrapper/StandaloneQueryWrapper'),
   ),
@@ -237,6 +241,12 @@ const SynapseComponents = {
   TableColumnSchemaEditor: lazy(
     () =>
       import('./components/TableColumnSchemaEditor/TableColumnSchemaEditor'),
+  ),
+  TableLineageGraph: lazy(
+    () => import('./components/TableLineageGraph/TableLineageGraph'),
+  ),
+  TableLineagePage: lazy(
+    () => import('./components/TableLineageGraph/TableLineagePage'),
   ),
   TrashCanList: lazy(() => import('./components/trash/TrashCanList')),
   UpdateTableWithCsvDialog: lazy(

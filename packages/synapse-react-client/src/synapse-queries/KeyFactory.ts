@@ -108,6 +108,16 @@ const entityQueryKeyObjects = {
     entityQueryKeyObjects.entity(id),
     'entityChallenge',
   ],
+  tableLineage: (
+    id: string,
+    versionNumber: number | undefined,
+    direction: string | undefined,
+    maxDepth: number | undefined,
+  ) => [
+    entityQueryKeyObjects.entity(id, versionNumber),
+    'tableLineage',
+    { direction, maxDepth },
+  ],
   activity: (id: string, versionNumber?: number) => [
     entityQueryKeyObjects.entity(id, versionNumber),
     'activity',
@@ -260,6 +270,22 @@ export class KeyFactory {
 
   public getEntityQueryKey(id: string) {
     return this.getKey(entityQueryKeyObjects.entity(id))
+  }
+
+  public getTableLineageQueryKey(
+    id: string,
+    versionNumber?: number,
+    direction?: string,
+    maxDepth?: number,
+  ) {
+    return this.getKey(
+      ...entityQueryKeyObjects.tableLineage(
+        id,
+        versionNumber,
+        direction,
+        maxDepth,
+      ),
+    )
   }
 
   public getEntityActivityQueryKey(id: string, versionNumber?: number) {

@@ -1,0 +1,22 @@
+.editor textarea {
+  font-family: var(--synapse-monospace-font, monospace);
+  font-size: 14px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.results {
+  max-height: 480px;
+  border: 1px solid var(--synapse-gray-300);
+  border-radius: 4px;
+}
+
+.panel {
+  padding-top: 16px;
+}

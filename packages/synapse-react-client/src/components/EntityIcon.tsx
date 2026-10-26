@@ -1,3 +1,4 @@
+import { SQL_WORKSHEET_ENTITY_TYPE } from '@/utils/functions/sqlWorksheetEntityType'
 import { entityTypeToFriendlyName } from '@/utils/functions/EntityTypeUtils'
 import { EntityType } from '@sage-bionetworks/synapse-client'
 import { CSSProperties, Fragment } from 'react'
@@ -29,7 +30,7 @@ const getIconTypeForEntity = (
     case EntityType.virtualtable:
     case EntityType.recordset:
     case EntityType.searchindex:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return map[type]
     default:
       return ''

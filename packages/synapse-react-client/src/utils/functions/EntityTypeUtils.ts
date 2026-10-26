@@ -1,3 +1,4 @@
+import { SQL_WORKSHEET_ENTITY_TYPE } from '@/utils/functions/sqlWorksheetEntityType'
 import { isTypeViaConcreteTypeFactory } from '@/utils/types/IsType'
 import { EntityType } from '@sage-bionetworks/synapse-client'
 import {
@@ -68,7 +69,7 @@ export function isContainerType(type: EntityType): boolean {
     case EntityType.materializedview:
     case EntityType.virtualtable:
     case EntityType.searchindex:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return false
     default:
       throw new Error(`Unknown entity type: ${type}`)
@@ -84,7 +85,7 @@ export function isTableType(type: EntityType): boolean {
     case EntityType.file:
     case EntityType.recordset:
     case EntityType.searchindex:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return false
     case EntityType.table:
     case EntityType.submissionview:
@@ -129,7 +130,7 @@ export function entityTypeToFriendlyName(entityType: EntityType): string {
       return 'Record Set'
     case EntityType.searchindex:
       return 'Search Index'
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return 'SQL Worksheet'
     default:
       console.warn('Entity type could not be mapped to name:', entityType)
@@ -172,8 +173,9 @@ export function convertToEntityType(
       return EntityType.recordset
     case 'org.sagebionetworks.repo.model.search.table.SearchIndex':
       return EntityType.searchindex
+    case SQL_WORKSHEET_ENTITY_TYPE:
     case 'org.sagebionetworks.repo.model.table.SqlWorksheet':
-      return EntityType.sqlworksheet
+      return SQL_WORKSHEET_ENTITY_TYPE
     default:
       throw new Error(`Unknown entity type: ${typeString}`)
   }
@@ -211,7 +213,7 @@ export function convertToConcreteEntityType(
       return 'org.sagebionetworks.repo.model.RecordSet'
     case EntityType.searchindex:
       return 'org.sagebionetworks.repo.model.search.table.SearchIndex'
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       // The spec this client is generated from lists the entity type, but not yet the SqlWorksheet schema.
       return 'org.sagebionetworks.repo.model.table.SqlWorksheet' as Entity_OpenAPI['concreteType']
     default:
@@ -241,7 +243,7 @@ export function isVersionableEntityType(type: EntityType): boolean {
     case EntityType.entityview:
     case EntityType.dataset:
     case EntityType.datasetcollection:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return true
     default:
       throw new Error(`Unknown entity type: ${type}`)

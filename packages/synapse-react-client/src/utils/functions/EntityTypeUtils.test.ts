@@ -1,3 +1,4 @@
+import { SQL_WORKSHEET_ENTITY_TYPE } from '@/utils/functions/sqlWorksheetEntityType'
 import {
   Entity as Entity_OpenAPI,
   EntityType,
@@ -102,7 +103,7 @@ const allEntityTypes: {
     friendlyName: 'Search Index',
   },
   {
-    type: EntityType.sqlworksheet,
+    type: SQL_WORKSHEET_ENTITY_TYPE,
     // The spec the client is generated from lists the entity type, but not yet the SqlWorksheet schema.
     concreteType:
       'org.sagebionetworks.repo.model.table.SqlWorksheet' as Entity_OpenAPI['concreteType'],

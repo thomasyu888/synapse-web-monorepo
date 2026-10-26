@@ -1,3 +1,4 @@
+import { SQL_WORKSHEET_ENTITY_TYPE } from '@/utils/functions/sqlWorksheetEntityType'
 import { useGetEntity, useGetVersions } from '@/synapse-queries'
 import {
   useAddFileToDownloadList,
@@ -99,7 +100,7 @@ query = syn.tableQuery("SELECT * FROM ${id}")
 query.asDataFrame()`,
       }
     case EntityType.searchindex:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return {
         cliCode: undefined,
         rCode: undefined,
@@ -242,7 +243,7 @@ export function getDownloadActionsForEntityType(
     case EntityType.link:
       return [[DownloadAction.programmaticAccess]]
     case EntityType.searchindex:
-    case EntityType.sqlworksheet:
+    case SQL_WORKSHEET_ENTITY_TYPE:
       return []
     default:
       // this will fail if a new EntityType is added and not handled

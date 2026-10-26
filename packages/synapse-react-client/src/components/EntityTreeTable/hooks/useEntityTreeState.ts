@@ -9,6 +9,7 @@ import {
   Direction,
 } from '@sage-bionetworks/synapse-types'
 import { EntityType } from '@sage-bionetworks/synapse-client'
+import { FILE_TREE_ENTITY_TYPES } from './fileTreeEntityTypes'
 import { useGetEntityHeader } from '@/synapse-queries'
 import { useGetEntityChildren } from '@/synapse-queries/entity/useGetEntityChildren'
 import { convertToEntityType } from '@/utils/functions/EntityTypeUtils'
@@ -21,13 +22,6 @@ export type TreeNode = {
   isLeaf: boolean
   children?: TreeNode[]
 }
-
-const includeTypes: EntityType[] = [
-  EntityType.folder,
-  EntityType.file,
-  EntityType.link,
-  EntityType.recordset,
-]
 
 /**
  * Hook that manages all tree state and data initialization.
@@ -86,7 +80,7 @@ export const useEntityTreeState = (
   const rootChildrenRequest: EntityChildrenRequest = useMemo(() => {
     const baseRequest: EntityChildrenRequest = {
       parentId: rootId,
-      includeTypes,
+      includeTypes: FILE_TREE_ENTITY_TYPES,
       sortBy,
       sortDirection,
     }

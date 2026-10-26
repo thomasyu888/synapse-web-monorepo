@@ -1,3 +1,4 @@
+import { FILE_TREE_ENTITY_TYPES } from './fileTreeEntityTypes'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { useEntityTreeState } from './useEntityTreeState'
 import { useGetEntityHeader } from '@/synapse-queries'
@@ -9,7 +10,6 @@ import {
   SortBy,
   Direction,
 } from '@sage-bionetworks/synapse-types'
-import { EntityType } from '@sage-bionetworks/synapse-client'
 import { KeyFactory } from '@/synapse-queries/KeyFactory'
 import { MOCK_ACCESS_TOKEN } from '@/mocks/MockSynapseContext'
 import { createWrapperAndQueryClient } from '@/testutils/TestingLibraryUtils'
@@ -48,12 +48,7 @@ const renderUseEntityTreeState = (
 }
 const contextKeyFactory = new KeyFactory(MOCK_ACCESS_TOKEN)
 
-const rootIncludeTypes: EntityType[] = [
-  EntityType.folder,
-  EntityType.file,
-  EntityType.link,
-  EntityType.recordset,
-]
+const rootIncludeTypes = FILE_TREE_ENTITY_TYPES
 
 const buildRootChildrenRequest = (
   overrides: Partial<EntityChildrenRequest> = {},
@@ -479,12 +474,7 @@ describe('useEntityTreeState', () => {
         expect(mockUseGetEntityChildren).toHaveBeenCalledWith(
           {
             parentId: 'syn123',
-            includeTypes: [
-              EntityType.folder,
-              EntityType.file,
-              EntityType.link,
-              EntityType.recordset,
-            ],
+            includeTypes: FILE_TREE_ENTITY_TYPES,
             sortBy: SortBy.NAME,
             sortDirection: Direction.DESC,
           },

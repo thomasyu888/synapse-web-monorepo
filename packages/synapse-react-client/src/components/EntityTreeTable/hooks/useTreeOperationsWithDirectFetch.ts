@@ -4,7 +4,7 @@ import { TreeNode } from './useEntityTreeState'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSynapseContext } from '@/utils/context/SynapseContext'
 import SynapseClient from '@/synapse-client'
-import { EntityType } from '@sage-bionetworks/synapse-client'
+import { FILE_TREE_ENTITY_TYPES } from './fileTreeEntityTypes'
 import {
   EntityHeader,
   SortBy,
@@ -15,13 +15,6 @@ import {
   isContainerType,
 } from '@/utils/functions/EntityTypeUtils'
 import { omit } from 'lodash-es'
-
-const includeTypes: EntityType[] = [
-  EntityType.folder,
-  EntityType.file,
-  EntityType.link,
-  EntityType.recordset,
-]
 
 export const useTreeOperationsWithDirectFetch = (
   expanded: Record<string, boolean>,
@@ -86,7 +79,7 @@ export const useTreeOperationsWithDirectFetch = (
     async (entityId: string, pageToken?: string) => {
       const entityChildrenRequest = {
         parentId: entityId,
-        includeTypes,
+        includeTypes: FILE_TREE_ENTITY_TYPES,
         ...(pageToken && { nextPageToken: pageToken }),
         sortBy,
         sortDirection,

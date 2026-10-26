@@ -20,3 +20,22 @@
 .panel {
   padding-top: 16px;
 }
+
+.landingBody {
+  padding: 0 32px 32px;
+}
+
+.landingSection {
+  margin-top: 24px;
+}
+
+.sqlPreview {
+  margin: 8px 0 0;
+  padding: 12px 16px;
+  font-family: var(--synapse-monospace-font, monospace);
+  font-size: 14px;
+  white-space: pre-wrap;
+  background-color: var(--synapse-gray-100);
+  border: 1px solid var(--synapse-gray-300);
+  border-radius: 4px;
+}

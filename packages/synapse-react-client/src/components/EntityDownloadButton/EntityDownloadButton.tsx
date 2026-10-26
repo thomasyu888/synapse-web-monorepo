@@ -99,6 +99,7 @@ query = syn.tableQuery("SELECT * FROM ${id}")
 query.asDataFrame()`,
       }
     case EntityType.searchindex:
+    case EntityType.sqlworksheet:
       return {
         cliCode: undefined,
         rCode: undefined,
@@ -241,6 +242,7 @@ export function getDownloadActionsForEntityType(
     case EntityType.link:
       return [[DownloadAction.programmaticAccess]]
     case EntityType.searchindex:
+    case EntityType.sqlworksheet:
       return []
     default:
       // this will fail if a new EntityType is added and not handled

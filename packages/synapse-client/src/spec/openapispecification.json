@@ -49392,7 +49392,8 @@
           "materializedview",
           "virtualtable",
           "recordset",
-          "searchindex"
+          "searchindex",
+          "sqlworksheet"
         ]
       },
       "org.sagebionetworks.evaluation.model.MemberSubmissionEligibility": {

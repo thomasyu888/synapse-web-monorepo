@@ -7,27 +7,30 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { QueryResultBundle } from '@sage-bionetworks/synapse-types'
+import { Row, SelectColumn } from '@sage-bionetworks/synapse-types'
 import styles from './SqlWorksheet.module.scss'
 import { WORKSHEET_ROW_LIMIT } from './SqlWorksheetUtils'
 
 export const NO_ROWS_MESSAGE = 'The query returned no rows.'
-export const ROW_LIMIT_MESSAGE = `Showing the first ${WORKSHEET_ROW_LIMIT} rows.`
+export const ROW_LIMIT_MESSAGE = `Showing the first ${WORKSHEET_ROW_LIMIT} rows. To get all of them, save the SQL as a materialized view and query it.`
 
 export type SqlWorksheetResultsProps = {
-  bundle: QueryResultBundle
+  columns: SelectColumn[]
+  rows: Row[]
+  isTruncated: boolean
 }
 
-export function SqlWorksheetResults({ bundle }: SqlWorksheetResultsProps) {
-  const rowSet = bundle.queryResult?.queryResults
-  const columns = bundle.selectColumns ?? rowSet?.headers ?? []
-  const rows = rowSet?.rows ?? []
+export function SqlWorksheetResults({
+  columns,
+  rows,
+  isTruncated,
+}: SqlWorksheetResultsProps) {
   if (rows.length === 0) {
     return <Typography variant="body1">{NO_ROWS_MESSAGE}</Typography>
   }
   return (
     <>
-      {rows.length >= WORKSHEET_ROW_LIMIT && (
+      {isTruncated && (
         <Typography variant="smallText1" sx={{ mb: 1, display: 'block' }}>
           {ROW_LIMIT_MESSAGE}
         </Typography>

@@ -8,6 +8,9 @@ import {
   getChangedNodeIds,
   getLineageFlowElements,
   getLineageNodeDisplayName,
+  getLineagePollInterval,
+  LINEAGE_ACTIVE_POLL_INTERVAL,
+  LINEAGE_IDLE_POLL_INTERVAL,
   NOT_FOUND_NODE_NAME,
   RESTRICTED_NODE_NAME,
 } from './TableLineageGraphUtils'
@@ -139,6 +142,33 @@ describe('TableLineageGraphUtils', () => {
       expect(
         getLineageNodeDisplayName({ id: 'syn1', access: 'NOT_FOUND' }),
       ).toBe(NOT_FOUND_NODE_NAME)
+    })
+  })
+
+  describe('getLineagePollInterval', () => {
+    const settled: TableLineage = {
+      ...mockTableLineage,
+      nodes: mockTableLineage.nodes.map(node =>
+        node.tableState
+          ? { ...node, tableState: 'AVAILABLE' as const, isStale: false }
+          : node,
+      ),
+    }
+
+    it('polls often while a node is being built or is stale', () => {
+      expect(getLineagePollInterval(mockTableLineage)).toBe(
+        LINEAGE_ACTIVE_POLL_INTERVAL,
+      )
+      expect(
+        getLineagePollInterval(
+          withNode(settled, MOCK_LINEAGE_ROOT_ID, { isStale: true }),
+        ),
+      ).toBe(LINEAGE_ACTIVE_POLL_INTERVAL)
+    })
+
+    it('polls rarely once every node is up to date, or before the first fetch', () => {
+      expect(getLineagePollInterval(settled)).toBe(LINEAGE_IDLE_POLL_INTERVAL)
+      expect(getLineagePollInterval(undefined)).toBe(LINEAGE_IDLE_POLL_INTERVAL)
     })
   })
 })

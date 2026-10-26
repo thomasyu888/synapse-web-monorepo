@@ -1,7 +1,5 @@
 import { parseSynId } from '@/utils/functions/RegularExpressions'
 
-export const SCRATCH_VIEW_NAME = 'SQL worksheet scratch'
-export const SCRATCH_PARENT_STORAGE_KEY = 'synapse-sql-worksheet-scratch-parent'
 /** The most rows a worksheet run shows */
 export const WORKSHEET_ROW_LIMIT = 100
 export const JOIN_COLUMN_HINT =
@@ -10,12 +8,12 @@ export const NO_TABLE_MESSAGE =
   'Add the table to query, for example: SELECT * FROM syn123'
 
 /**
- * How a worksheet runs its SQL. Synapse only allows a query on one table at a time; SQL that combines tables (JOIN,
- * UNION, or several FROM targets) can only be the definingSQL of a materialized view, so it runs as one.
+ * How a worksheet runs its SQL. A query on one table runs as a table query; SQL that combines tables (JOIN, UNION, or
+ * several FROM targets) runs as a SQL query job, which follows the rules of a materialized view's definingSQL.
  */
 export type WorksheetPlan =
   | { kind: 'direct'; entityId: string; versionNumber?: number }
-  | { kind: 'materializedView'; sourceIds: string[] }
+  | { kind: 'combined'; sourceIds: string[] }
   | { kind: 'invalid'; reason: string }
 
 // String literals and comments may contain anything, including "from syn1" or "join"; they are blanked out before
@@ -53,7 +51,7 @@ export function planWorksheetQuery(sql: string): WorksheetPlan {
     return { kind: 'invalid', reason: NO_TABLE_MESSAGE }
   }
   if (combinesTables(sql)) {
-    return { kind: 'materializedView', sourceIds }
+    return { kind: 'combined', sourceIds }
   }
   const reference = parseSynId(sourceIds[0])!
   return {
@@ -78,4 +76,19 @@ export function getWorksheetErrorHint(
   return combinesTables && /unknown column|reserved/i.test(reason)
     ? JOIN_COLUMN_HINT
     : undefined
+}
+
+/**
+ * @returns The SQL with runs of whitespace collapsed and everything outside string literals in lower case, so two
+ *  statements that differ only in layout or keyword case compare equal
+ */
+export function normalizeSql(sql: string): string {
+  return sql
+    .trim()
+    .split(/('(?:[^']|'')*')/)
+    .map((part, index) =>
+      // The split keeps each literal at an odd index.
+      index % 2 === 1 ? part : part.replace(/\s+/g, ' ').toLowerCase(),
+    )
+    .join('')
 }

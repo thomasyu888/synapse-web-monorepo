@@ -1,4 +1,5 @@
 import SynapseClient from '@/synapse-client'
+import { runSqlQuery } from '@/synapse-queries/table/SqlQuery'
 import { useSynapseContext } from '@/utils/context/SynapseContext'
 import {
   BUNDLE_MASK_QUERY_RESULTS,
@@ -6,121 +7,55 @@ import {
 } from '@/utils/SynapseConstants'
 import { SynapseClientError } from '@sage-bionetworks/synapse-client/util/SynapseClientError'
 import {
-  MATERIALIZED_VIEW_CONCRETE_TYPE_VALUE,
-  MaterializedView,
   QueryBundleRequest,
-  QueryResultBundle,
+  Row,
+  SelectColumn,
 } from '@sage-bionetworks/synapse-types'
 import { useMutation, UseMutationOptions } from '@tanstack/react-query'
-import {
-  planWorksheetQuery,
-  SCRATCH_VIEW_NAME,
-  WORKSHEET_ROW_LIMIT,
-} from './SqlWorksheetUtils'
-
-export type RunSqlWorksheetVariables = {
-  sql: string
-  /** The project or folder that holds the scratch view; required when the SQL combines tables */
-  scratchParentId?: string
-}
+import { planWorksheetQuery, WORKSHEET_ROW_LIMIT } from './SqlWorksheetUtils'
 
 export type RunSqlWorksheetResult = {
-  /** The table or view that was queried: the referenced table, or the scratch view */
-  queriedEntityId: string
-  /** Whether the SQL ran as the definingSQL of the scratch view */
-  ranAsMaterializedView: boolean
-  bundle: QueryResultBundle
+  /** The tables and views the SQL reads, in order of appearance */
+  sourceIds: string[]
+  columns: SelectColumn[]
+  rows: Row[]
+  /** True when the SQL has more rows than {@link WORKSHEET_ROW_LIMIT} */
+  isTruncated: boolean
 }
 
-export const SCRATCH_PARENT_REQUIRED_MESSAGE =
-  'This SQL combines tables, so it runs as a materialized view. Choose a project or folder for the scratch view first.'
-export const SCRATCH_VIEW_NOT_A_VIEW_MESSAGE = (parentId: string) =>
-  `"${SCRATCH_VIEW_NAME}" in ${parentId} is not a materialized view. Rename it, or choose another project or folder.`
-
-function getQueryRequest(entityId: string, sql: string): QueryBundleRequest {
-  return {
-    concreteType: 'org.sagebionetworks.repo.model.table.QueryBundleRequest',
-    entityId,
-    query: { sql, limit: WORKSHEET_ROW_LIMIT },
-    partMask: BUNDLE_MASK_QUERY_RESULTS | BUNDLE_MASK_QUERY_SELECT_COLUMNS,
-  }
-}
-
-async function findScratchView(
-  parentId: string,
-  accessToken: string | undefined,
-): Promise<MaterializedView | undefined> {
-  try {
-    const { id } = await SynapseClient.lookupChildEntity(
-      { parentId, entityName: SCRATCH_VIEW_NAME },
-      accessToken,
-    )
-    const entity = await SynapseClient.getEntity<MaterializedView>(
-      accessToken,
-      id,
-    )
-    if (entity.concreteType !== MATERIALIZED_VIEW_CONCRETE_TYPE_VALUE) {
-      throw new Error(SCRATCH_VIEW_NOT_A_VIEW_MESSAGE(parentId))
-    }
-    return entity
-  } catch (e) {
-    if (e instanceof SynapseClientError && e.status === 404) {
-      return undefined
-    }
-    throw e
-  }
-}
-
-/**
- * The scratch view is one materialized view per parent, reused by every run: its definingSQL is replaced, which
- * makes Synapse rebuild it.
- */
-async function saveScratchView(
-  parentId: string,
-  sql: string,
-  accessToken: string | undefined,
-): Promise<MaterializedView> {
-  const existing = await findScratchView(parentId, accessToken)
-  if (!existing) {
-    const scratchView: MaterializedView = {
-      name: SCRATCH_VIEW_NAME,
-      parentId,
-      concreteType: MATERIALIZED_VIEW_CONCRETE_TYPE_VALUE,
-      definingSQL: sql,
-      // Synapse derives a materialized view's columns from its definingSQL
-      columnIds: [],
-      isSearchEnabled: false,
-    }
-    return SynapseClient.createEntity(scratchView, accessToken)
-  }
-  if (existing.definingSQL === sql) {
-    return existing
-  }
-  return SynapseClient.updateEntity(
-    { ...existing, definingSQL: sql },
-    accessToken,
-  )
-}
-
-async function runQuery(
+async function runTableQuery(
   entityId: string,
   sql: string,
   accessToken: string | undefined,
   onProgress: (message: string) => void,
-): Promise<QueryResultBundle> {
+): Promise<Pick<RunSqlWorksheetResult, 'columns' | 'rows' | 'isTruncated'>> {
+  // One row more than is shown tells whether there are more.
+  const request: QueryBundleRequest = {
+    concreteType: 'org.sagebionetworks.repo.model.table.QueryBundleRequest',
+    entityId,
+    query: { sql, limit: WORKSHEET_ROW_LIMIT + 1 },
+    partMask: BUNDLE_MASK_QUERY_RESULTS | BUNDLE_MASK_QUERY_SELECT_COLUMNS,
+  }
   const status = await SynapseClient.getQueryTableAsyncJobResults(
-    getQueryRequest(entityId, sql),
+    request,
     accessToken,
     jobStatus => onProgress(jobStatus.progressMessage ?? ''),
   )
-  return status.responseBody!
+  const bundle = status.responseBody!
+  const rowSet = bundle.queryResult?.queryResults
+  const rows = rowSet?.rows ?? []
+  return {
+    columns: bundle.selectColumns ?? rowSet?.headers ?? [],
+    rows: rows.slice(0, WORKSHEET_ROW_LIMIT),
+    isTruncated: rows.length > WORKSHEET_ROW_LIMIT,
+  }
 }
 
 /**
- * Runs worksheet SQL. A query on one table runs directly; SQL that combines tables becomes the definingSQL of the
- * scratch view in the chosen parent, and the view is queried once Synapse has built it.
+ * Runs worksheet SQL. A query on one table runs as a table query; SQL that combines tables runs as a SQL query job,
+ * which saves nothing and so never adds to table lineage.
  *
- * @param onProgress Receives the progress messages of the running query (e.g. while the view is built)
+ * @param onProgress Receives the progress messages of the running query (e.g. while a source is built)
  */
 export function useRunSqlWorksheet(
   onProgress: (message: string) => void,
@@ -128,57 +63,43 @@ export function useRunSqlWorksheet(
     UseMutationOptions<
       RunSqlWorksheetResult,
       SynapseClientError | Error,
-      RunSqlWorksheetVariables
+      string
     >
   >,
 ) {
   const { accessToken } = useSynapseContext()
-  return useMutation<
-    RunSqlWorksheetResult,
-    SynapseClientError | Error,
-    RunSqlWorksheetVariables
-  >({
-    ...options,
-    mutationFn: async ({ sql, scratchParentId }) => {
-      const plan = planWorksheetQuery(sql)
-      switch (plan.kind) {
-        case 'invalid':
-          throw new Error(plan.reason)
-        case 'direct': {
-          const bundle = await runQuery(
-            plan.entityId,
-            sql,
-            accessToken,
-            onProgress,
-          )
-          return {
-            queriedEntityId: plan.entityId,
-            ranAsMaterializedView: false,
-            bundle,
+  return useMutation<RunSqlWorksheetResult, SynapseClientError | Error, string>(
+    {
+      ...options,
+      mutationFn: async sql => {
+        const plan = planWorksheetQuery(sql)
+        switch (plan.kind) {
+          case 'invalid':
+            throw new Error(plan.reason)
+          case 'direct': {
+            const result = await runTableQuery(
+              plan.entityId,
+              sql,
+              accessToken,
+              onProgress,
+            )
+            return { ...result, sourceIds: [plan.entityId] }
+          }
+          case 'combined': {
+            const response = await runSqlQuery(
+              { sql, limit: WORKSHEET_ROW_LIMIT },
+              accessToken,
+              jobStatus => onProgress(jobStatus.progressMessage ?? ''),
+            )
+            return {
+              sourceIds: plan.sourceIds,
+              columns: response.rowSet.headers ?? [],
+              rows: response.rowSet.rows ?? [],
+              isTruncated: response.isTruncated,
+            }
           }
         }
-        case 'materializedView': {
-          if (!scratchParentId) {
-            throw new Error(SCRATCH_PARENT_REQUIRED_MESSAGE)
-          }
-          const scratchView = await saveScratchView(
-            scratchParentId,
-            sql,
-            accessToken,
-          )
-          const bundle = await runQuery(
-            scratchView.id!,
-            `SELECT * FROM ${scratchView.id}`,
-            accessToken,
-            onProgress,
-          )
-          return {
-            queriedEntityId: scratchView.id!,
-            ranAsMaterializedView: true,
-            bundle,
-          }
-        }
-      }
+      },
     },
-  })
+  )
 }

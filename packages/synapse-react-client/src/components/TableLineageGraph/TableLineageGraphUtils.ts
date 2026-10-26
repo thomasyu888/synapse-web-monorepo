@@ -10,12 +10,21 @@ import { ConnectionLineType, Edge, MarkerType, Node, Position } from 'reactflow'
 
 export const LINEAGE_NODE_WIDTH = 220
 export const LINEAGE_NODE_HEIGHT = 100
+/** How often the lineage is re-fetched while a change is travelling through it, in ms */
+export const LINEAGE_ACTIVE_POLL_INTERVAL = 3000
+/** How often the lineage is re-fetched while every node is up to date, in ms, to notice a change that starts */
+export const LINEAGE_IDLE_POLL_INTERVAL = 30_000
+
 /**
- * How often the lineage is re-fetched while it is shown, in ms. A materialized view that is already AVAILABLE stays
- * AVAILABLE while it rebuilds, and only its stateChangedOn advances when the rebuilt index is swapped in, so the graph
- * polls steadily rather than only while a node is PROCESSING.
+ * A change is travelling through the lineage while a node is being built or is stale (it will rebuild). A view that
+ * is already AVAILABLE stays AVAILABLE while it rebuilds, so a stale node is the only sign of that.
  */
-export const LINEAGE_POLL_INTERVAL = 3000
+export function getLineagePollInterval(lineage: TableLineage | undefined) {
+  const isChanging = lineage?.nodes.some(
+    node => node.tableState === 'PROCESSING' || node.isStale === true,
+  )
+  return isChanging ? LINEAGE_ACTIVE_POLL_INTERVAL : LINEAGE_IDLE_POLL_INTERVAL
+}
 
 export const RESTRICTED_NODE_NAME = 'Restricted'
 export const NOT_FOUND_NODE_NAME = 'Deleted'

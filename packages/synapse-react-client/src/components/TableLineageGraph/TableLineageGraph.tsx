@@ -14,7 +14,7 @@ import {
   getLineageFlowElements,
   getLineageNodeHref,
   hasLineage,
-  LINEAGE_POLL_INTERVAL,
+  getLineagePollInterval,
   LineageNodeData,
   NO_LINEAGE_MESSAGE,
   TRUNCATED_LINEAGE_MESSAGE,
@@ -63,14 +63,17 @@ function TableLineageReactFlow(props: TableLineageGraphProps) {
     () => ({ entityId, versionNumber, direction, maxDepth }),
     [entityId, versionNumber, direction, maxDepth],
   )
-  // Polls while shown (react-query pauses it while the browser tab is hidden), so a change can be watched travelling
-  // downstream. dataUpdatedAt advances on every fetch, which keeps the "Rebuilt 4s ago" times current.
+  // Polls while shown (react-query pauses it while the browser tab is hidden): often while a change travels downstream,
+  // rarely once everything is up to date. dataUpdatedAt advances on every fetch, which keeps the "Rebuilt 4s ago"
+  // times current.
   const {
     data: lineage,
     dataUpdatedAt,
     isLoading,
     error,
-  } = useGetTableLineage(params, { refetchInterval: LINEAGE_POLL_INTERVAL })
+  } = useGetTableLineage(params, {
+    refetchInterval: query => getLineagePollInterval(query.state.data),
+  })
 
   // Compare each fetch with the previous one, to flash the nodes whose index just changed. A fetch that returns the
   // same lineage keeps the same object (react-query's structural sharing), so the changes are cleared then.

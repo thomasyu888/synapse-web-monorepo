@@ -751,6 +751,7 @@ export const type2SvgIconName: Record<EntityType, IconName> = {
   datasetcollection: 'datasetcollection',
   recordset: 'fileWithShield',
   searchindex: 'search',
+  sqlworksheet: 'code',
 }
 
 export const type2SvgIconNameOutlined: Record<EntityType, IconName> = {
@@ -768,6 +769,7 @@ export const type2SvgIconNameOutlined: Record<EntityType, IconName> = {
   datasetcollection: 'datasetcollection',
   recordset: 'fileWithShield',
   searchindex: 'searchOutlined',
+  sqlworksheet: 'code',
 }
 
 export default IconSvg

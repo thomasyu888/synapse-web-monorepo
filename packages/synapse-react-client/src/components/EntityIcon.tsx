@@ -29,6 +29,7 @@ const getIconTypeForEntity = (
     case EntityType.virtualtable:
     case EntityType.recordset:
     case EntityType.searchindex:
+    case EntityType.sqlworksheet:
       return map[type]
     default:
       return ''

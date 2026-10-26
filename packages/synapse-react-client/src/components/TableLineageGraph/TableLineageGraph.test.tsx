@@ -26,6 +26,7 @@ import {
   PROCESSING_LABEL,
   REBUILT_LABEL,
   ROOT_LABEL,
+  STALE_LABEL,
   UPDATED_LABEL,
 } from './TableLineageNodeLabel'
 
@@ -71,6 +72,20 @@ describe('TableLineageGraph', () => {
     expect(
       within(await findNode('Cohort summary')).getByText(FAILED_LABEL),
     ).toBeInTheDocument()
+  })
+
+  it('shows a view that will rebuild as pending, not available', async () => {
+    useLineage({
+      ...mockTableLineage,
+      nodes: mockTableLineage.nodes.map(node =>
+        node.id === MOCK_LINEAGE_ROOT_ID ? { ...node, isStale: true } : node,
+      ),
+    })
+    renderComponent()
+
+    const root = await findNode('Participants with samples')
+    expect(within(root).getByText(STALE_LABEL)).toBeInTheDocument()
+    expect(within(root).queryByText(AVAILABLE_LABEL)).not.toBeInTheDocument()
   })
 
   it('shows unreadable and deleted nodes by id only', async () => {

@@ -19,6 +19,11 @@ export type TableLineageNode = {
   tableState?: LineageTableState
   stateChangedOn?: string
   errorMessage?: string
+  /**
+   * True when the object is AVAILABLE but a readable source in the graph changed after it was built, is being rebuilt,
+   * or is itself stale: the object will be rebuilt. Only set with tableState.
+   */
+  isStale?: boolean
 }
 
 /** The dependent object is built from the source. */

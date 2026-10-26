@@ -1,5 +1,8 @@
+import { getSqlQueryHandlers } from '@/mocks/msw/handlers/sqlQueryHandlers'
+import { getTableLineageHandlers } from '@/mocks/msw/handlers/tableLineageHandlers'
 import { registerTableQueryResult } from '@/mocks/msw/handlers/tableQueryService'
 import mockRejectionReasonsTableQueryResultBundle from '@/mocks/query/mockRejectionReasonsTableQueryResultBundle'
+import { MOCK_REPO_ORIGIN } from '@/utils/functions/getEndpoint'
 import { Meta, StoryObj } from '@storybook/react-vite'
 import SqlWorksheet, { SqlWorksheetProps } from './SqlWorksheet'
 
@@ -31,6 +34,14 @@ export const Join: Story = {
   args: {
     initialSql:
       'SELECT p.id, p.age, s.type\nFROM syn9100001 p\nJOIN syn9100002 s ON s.participant = p.id',
+  },
+  parameters: {
+    msw: {
+      handlers: {
+        sqlQuery: getSqlQueryHandlers(MOCK_REPO_ORIGIN),
+        tableLineage: getTableLineageHandlers(MOCK_REPO_ORIGIN),
+      },
+    },
   },
 }
 

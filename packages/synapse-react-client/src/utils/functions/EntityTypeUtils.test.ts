@@ -101,6 +101,13 @@ const allEntityTypes: {
     concreteType: 'org.sagebionetworks.repo.model.search.table.SearchIndex',
     friendlyName: 'Search Index',
   },
+  {
+    type: EntityType.sqlworksheet,
+    // The spec the client is generated from lists the entity type, but not yet the SqlWorksheet schema.
+    concreteType:
+      'org.sagebionetworks.repo.model.table.SqlWorksheet' as Entity_OpenAPI['concreteType'],
+    friendlyName: 'SQL Worksheet',
+  },
 ]
 
 /**

@@ -16,6 +16,9 @@ export const FAILED_LABEL = 'Failed'
 export const ROOT_LABEL = 'Selected'
 export const REBUILT_LABEL = 'Rebuilt'
 export const UPDATED_LABEL = 'Updated'
+export const STALE_LABEL = 'Rebuild pending'
+export const STALE_TOOLTIP =
+  'A table this is built from changed since it was last built, so it will be rebuilt.'
 
 function LineageNodeIcon({ node }: { node: TableLineageNode }) {
   if (node.access === 'RESTRICTED') {
@@ -36,7 +39,13 @@ function LineageNodeIcon({ node }: { node: TableLineageNode }) {
 function LineageStateChip({ node }: { node: TableLineageNode }) {
   switch (node.tableState) {
     case 'AVAILABLE':
-      return <Chip size="small" color="success" label={AVAILABLE_LABEL} />
+      return node.isStale ? (
+        <Tooltip title={STALE_TOOLTIP}>
+          <Chip size="small" color="warning" label={STALE_LABEL} />
+        </Tooltip>
+      ) : (
+        <Chip size="small" color="success" label={AVAILABLE_LABEL} />
+      )
     case 'PROCESSING':
       return (
         <Chip

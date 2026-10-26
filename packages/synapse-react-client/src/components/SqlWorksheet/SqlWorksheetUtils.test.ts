@@ -5,6 +5,7 @@ import {
   getWorksheetErrorHint,
   JOIN_COLUMN_HINT,
   NO_TABLE_MESSAGE,
+  normalizeSql,
   planWorksheetQuery,
 } from './SqlWorksheetUtils'
 
@@ -54,13 +55,13 @@ describe('SqlWorksheetUtils', () => {
         planWorksheetQuery(
           'SELECT * FROM syn1 a JOIN syn2 b ON a.id = b.participant',
         ),
-      ).toEqual({ kind: 'materializedView', sourceIds: ['syn1', 'syn2'] })
+      ).toEqual({ kind: 'combined', sourceIds: ['syn1', 'syn2'] })
     })
 
     it('runs a UNION of one table as a materialized view', () => {
       expect(
         planWorksheetQuery('SELECT a FROM syn1 UNION SELECT b FROM syn1'),
-      ).toEqual({ kind: 'materializedView', sourceIds: ['syn1'] })
+      ).toEqual({ kind: 'combined', sourceIds: ['syn1'] })
     })
 
     it('rejects SQL that names no table', () => {
@@ -89,6 +90,25 @@ describe('SqlWorksheetUtils', () => {
       ['You lack READ access to the requested entity.', true, undefined],
     ])('%s (combines tables: %s)', (reason, combinesTables, expected) => {
       expect(getWorksheetErrorHint(reason, combinesTables)).toBe(expected)
+    })
+  })
+
+  describe('normalizeSql', () => {
+    it('ignores layout and keyword case', () => {
+      expect(
+        normalizeSql(
+          'SELECT a.id\n  FROM syn1 a\n\tJOIN syn2 b ON a.id = b.id  ',
+        ),
+      ).toBe(normalizeSql('select a.id from SYN1 a join syn2 b on a.id = b.id'))
+    })
+
+    it('keeps string literals as written', () => {
+      expect(
+        normalizeSql("SELECT * FROM syn1 WHERE tissue = 'Blood  Cells'"),
+      ).toBe("select * from syn1 where tissue = 'Blood  Cells'")
+      expect(
+        normalizeSql("SELECT * FROM syn1 WHERE tissue = 'Blood'"),
+      ).not.toBe(normalizeSql("SELECT * FROM syn1 WHERE tissue = 'blood'"))
     })
   })
 })

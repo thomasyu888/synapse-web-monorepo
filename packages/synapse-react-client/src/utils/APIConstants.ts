@@ -66,6 +66,11 @@ export const ENTITY_ACCESS_REQUIREMENTS = (entityId: string | number) =>
 export const TABLE_LINEAGE = (id: string | number) =>
   `${ENTITY_ID(id)}/table/lineage`
 
+export const TABLE_SQL_QUERY_ASYNC_START = `${REPO}/table/sql/query/async/start`
+
+export const TABLE_SQL_QUERY_ASYNC_GET = (asyncJobToken: string | number) =>
+  `${REPO}/table/sql/query/async/get/${asyncJobToken}`
+
 export const TABLE_QUERY_ASYNC_START = (id: string | number) =>
   `${ENTITY_ID(id)}/table/query/async/start`
 

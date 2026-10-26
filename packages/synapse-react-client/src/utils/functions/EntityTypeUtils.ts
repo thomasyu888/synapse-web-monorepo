@@ -68,6 +68,7 @@ export function isContainerType(type: EntityType): boolean {
     case EntityType.materializedview:
     case EntityType.virtualtable:
     case EntityType.searchindex:
+    case EntityType.sqlworksheet:
       return false
     default:
       throw new Error(`Unknown entity type: ${type}`)
@@ -83,6 +84,7 @@ export function isTableType(type: EntityType): boolean {
     case EntityType.file:
     case EntityType.recordset:
     case EntityType.searchindex:
+    case EntityType.sqlworksheet:
       return false
     case EntityType.table:
     case EntityType.submissionview:
@@ -127,6 +129,8 @@ export function entityTypeToFriendlyName(entityType: EntityType): string {
       return 'Record Set'
     case EntityType.searchindex:
       return 'Search Index'
+    case EntityType.sqlworksheet:
+      return 'SQL Worksheet'
     default:
       console.warn('Entity type could not be mapped to name:', entityType)
       return ''
@@ -168,6 +172,8 @@ export function convertToEntityType(
       return EntityType.recordset
     case 'org.sagebionetworks.repo.model.search.table.SearchIndex':
       return EntityType.searchindex
+    case 'org.sagebionetworks.repo.model.table.SqlWorksheet':
+      return EntityType.sqlworksheet
     default:
       throw new Error(`Unknown entity type: ${typeString}`)
   }
@@ -205,6 +211,9 @@ export function convertToConcreteEntityType(
       return 'org.sagebionetworks.repo.model.RecordSet'
     case EntityType.searchindex:
       return 'org.sagebionetworks.repo.model.search.table.SearchIndex'
+    case EntityType.sqlworksheet:
+      // The spec this client is generated from lists the entity type, but not yet the SqlWorksheet schema.
+      return 'org.sagebionetworks.repo.model.table.SqlWorksheet' as Entity_OpenAPI['concreteType']
     default:
       throw new Error(`Unknown entity type: ${type}`)
   }
@@ -232,6 +241,7 @@ export function isVersionableEntityType(type: EntityType): boolean {
     case EntityType.entityview:
     case EntityType.dataset:
     case EntityType.datasetcollection:
+    case EntityType.sqlworksheet:
       return true
     default:
       throw new Error(`Unknown entity type: ${type}`)

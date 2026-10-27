@@ -1,0 +1,36 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  // The Synapse header stays above the page; the session fills the rest of the window.
+  height: calc(100vh - 80px);
+  min-height: 480px;
+}
+
+.header {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--synapse-gray-300);
+}
+
+.inputs {
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--synapse-gray-300);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+}
+
+.sessionFrame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+}

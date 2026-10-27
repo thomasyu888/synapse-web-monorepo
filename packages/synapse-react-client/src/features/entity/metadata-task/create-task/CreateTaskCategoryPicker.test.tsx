@@ -10,6 +10,7 @@ describe('CreateTaskCategoryPicker', () => {
       <CreateTaskCategoryPicker
         onSelectCompute={onSelectCompute}
         onSelectCurate={vi.fn()}
+        onSelectEnclave={vi.fn()}
       />,
     )
 
@@ -25,6 +26,7 @@ describe('CreateTaskCategoryPicker', () => {
       <CreateTaskCategoryPicker
         onSelectCompute={vi.fn()}
         onSelectCurate={onSelectCurate}
+        onSelectEnclave={vi.fn()}
       />,
     )
 
@@ -33,11 +35,28 @@ describe('CreateTaskCategoryPicker', () => {
     expect(onSelectCurate).toHaveBeenCalled()
   })
 
+  it('calls onSelectEnclave when the Enclave Session card is clicked', async () => {
+    const onSelectEnclave = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CreateTaskCategoryPicker
+        onSelectCompute={vi.fn()}
+        onSelectCurate={vi.fn()}
+        onSelectEnclave={onSelectEnclave}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /enclave session/i }))
+
+    expect(onSelectEnclave).toHaveBeenCalled()
+  })
+
   it('renders the Curate Data card before the Compute Data card', () => {
     render(
       <CreateTaskCategoryPicker
         onSelectCompute={vi.fn()}
         onSelectCurate={vi.fn()}
+        onSelectEnclave={vi.fn()}
       />,
     )
 

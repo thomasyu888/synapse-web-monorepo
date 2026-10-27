@@ -1,3 +1,8 @@
+import {
+  getComputePageHref,
+  OPEN_IN_COMPUTE_BUTTON_TEXT,
+} from '@/features/compute/computePageHref'
+import { getInteractiveSessionProperties } from '@/synapse-queries/curation/task/useInteractiveSession'
 import { StickyNote2Outlined } from '@mui/icons-material'
 import { Box, Button, Tooltip } from '@mui/material'
 import { TaskBundle } from '@sage-bionetworks/synapse-client'
@@ -14,6 +19,31 @@ import {
  * by the task.
  */
 export default function MetadataTaskTableActionCell(props: {
+  taskBundle: TaskBundle
+  canEdit: boolean
+}) {
+  if (getInteractiveSessionProperties(props.taskBundle.task?.taskProperties)) {
+    return <EnclaveTaskActionCell taskId={props.taskBundle.task!.taskId!} />
+  }
+  return <CuratorTaskActionCell {...props} />
+}
+
+/**
+ * An interactive session (enclave) task is started and used on its Compute page; its settings cannot be edited here.
+ */
+function EnclaveTaskActionCell(props: { taskId: number }) {
+  return (
+    <Button
+      variant="contained"
+      size={'small'}
+      onClick={() => window.location.assign(getComputePageHref(props.taskId))}
+    >
+      {OPEN_IN_COMPUTE_BUTTON_TEXT}
+    </Button>
+  )
+}
+
+function CuratorTaskActionCell(props: {
   taskBundle: TaskBundle
   canEdit: boolean
 }) {

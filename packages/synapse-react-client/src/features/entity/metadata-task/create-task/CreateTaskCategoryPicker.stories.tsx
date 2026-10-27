@@ -12,5 +12,6 @@ export const Default: Story = {
   args: {
     onSelectCompute: () => alert('Selected Compute Data'),
     onSelectCurate: () => alert('Selected Curate Data'),
+    onSelectEnclave: () => alert('Selected Enclave Session'),
   },
 }

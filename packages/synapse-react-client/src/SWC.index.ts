@@ -93,6 +93,7 @@ const SynapseComponents = {
   CuratorDashboard: lazy(
     () => import('./features/curator/dashboard/CuratorDashboardRouter'),
   ),
+  ComputeSessionPage: lazy(() => import('./features/compute/ComputeSessionPage')),
   DatasetItemsEditor: lazy(
     () => import('./components/SynapseTable/datasets/DatasetItemsEditor'),
   ),

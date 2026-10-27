@@ -2,6 +2,7 @@ import useOpenCuratorFromTaskButton from '@/features/entity/metadata-task/hooks/
 import { createMockTaskBundle } from '@/mocks/curation/mockCurationTask'
 import useGetEntityBundle from '@/synapse-queries/entity/useEntityBundle'
 import {
+  CurationTaskProperties,
   FileBasedMetadataTaskPropertiesConcreteTypeEnum,
   RecordBasedMetadataTaskPropertiesConcreteTypeEnum,
   RecordSetGenerationExecutionPropertiesConcreteTypeEnum,
@@ -13,6 +14,11 @@ import userEvent from '@testing-library/user-event'
 import { useNavigate } from 'react-router'
 import { beforeEach } from 'vitest'
 import CurationTaskCard from './CurationTaskCard'
+import {
+  getComputePageHref,
+  OPEN_IN_COMPUTE_BUTTON_TEXT,
+} from '@/features/compute/computePageHref'
+import { INTERACTIVE_SESSION_PROPERTIES_CONCRETE_TYPE } from '@/synapse-queries/curation/task/useInteractiveSession'
 
 vi.mock('react-router')
 
@@ -139,6 +145,28 @@ describe('CurationTaskCard', () => {
       expect(
         screen.getByRole('button', { name: /open curator/i }),
       ).toBeInTheDocument()
+    })
+  })
+
+  describe('interactive session task', () => {
+    it('opens the task on its Compute page', async () => {
+      const taskBundle = createMockTaskBundle({
+        projectId: 'syn123',
+        taskProperties: {
+          concreteType: INTERACTIVE_SESSION_PROPERTIES_CONCRETE_TYPE,
+        } as unknown as CurationTaskProperties,
+      })
+      const assign = vi.spyOn(window.location, 'assign')
+      renderComponent(taskBundle)
+
+      await userEvent.click(
+        screen.getByRole('button', { name: new RegExp(OPEN_IN_COMPUTE_BUTTON_TEXT) }),
+      )
+
+      expect(assign).toHaveBeenCalledWith(
+        getComputePageHref(taskBundle.task!.taskId!),
+      )
+      expect(getComputePageHref(1002)).toMatch(/Compute:1002$/)
     })
   })
 

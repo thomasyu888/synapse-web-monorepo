@@ -1244,6 +1244,10 @@ export class KeyFactory {
     return this.getKey('curationTask', 'list')
   }
 
+  public getCurationSessionEnvironmentsKey() {
+    return this.getKey('curationSessionEnvironments')
+  }
+
   public getCsvPreviewQueryKey(request: UploadToTablePreviewRequest) {
     return this.getKey('csvPreview', request)
   }

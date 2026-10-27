@@ -38,6 +38,23 @@ export const CREATE_COMPUTE_TASK_PAGE_TITLE = 'Create New Compute Task'
 export const FILL_IN_COMPUTE_TASK_DETAILS_DESCRIPTION =
   'Fill in New Compute Data Task Details'
 
+export const ENCLAVE_TASK_CATEGORY_TITLE = 'Enclave Session'
+export const CREATE_ENCLAVE_TASK_PAGE_TITLE = 'Create New Enclave Session Task'
+export const FILL_IN_ENCLAVE_TASK_DETAILS_DESCRIPTION =
+  'A JupyterLab session with no network, over read-only copies of the files in a folder'
+export const ENCLAVE_INPUT_FOLDER_LABEL = 'Input Folder'
+export const ENCLAVE_INPUT_FOLDER_DESCRIPTION =
+  'The files directly in this folder are copied, read-only, into the session. Whoever starts the session must be able to download every one of them.'
+export const ENCLAVE_INPUT_FOLDER_FINDER_TITLE = 'Select Input Folder'
+export const ENCLAVE_INPUT_FOLDER_FINDER_PROMPT =
+  'Select the folder whose files the session works on'
+export const ENCLAVE_ENVIRONMENT_LABEL = 'Environment'
+export const ENCLAVE_NO_ENVIRONMENTS_MESSAGE =
+  'This Synapse has no approved environments for enclave sessions.'
+export const ENCLAVE_DURATION_LABEL = 'Session Length'
+export const ENCLAVE_DURATION_MINUTES_OPTIONS = [30, 60, 120, 240, 480] as const
+export const ENCLAVE_DEFAULT_DURATION_MINUTES = 120
+
 export const CREATE_CURATE_TASK_PAGE_TITLE = 'Create New Curate Task'
 export const FILL_IN_CURATE_TASK_DETAILS_DESCRIPTION =
   'Fill in New Curate Data Task Details'

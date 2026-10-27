@@ -2,6 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import {
   COMPUTE_TASK_CATEGORY_TITLE,
   CURATE_TASK_CATEGORY_TITLE,
+  ENCLAVE_TASK_CATEGORY_TITLE,
   SELECT_TASK_CATEGORY_DESCRIPTION,
 } from '../utils/constants'
 import TaskCategoryCard from './TaskCategoryCard'
@@ -11,16 +12,17 @@ import { ReactComponent as ComputeIllustration } from '@/assets/illustrations/co
 export type CreateTaskCategoryPickerProps = {
   onSelectCompute: () => void
   onSelectCurate: () => void
+  onSelectEnclave: () => void
 }
 
 /**
- * Step 1 of the create-task flow: lets the user pick which category of task to create, Compute Data or
- * Curate Data.
+ * Step 1 of the create-task flow: lets the user pick which category of task to create, Compute Data, Curate
+ * Data or an Enclave Session.
  */
 export default function CreateTaskCategoryPicker(
   props: CreateTaskCategoryPickerProps,
 ) {
-  const { onSelectCompute, onSelectCurate } = props
+  const { onSelectCompute, onSelectCurate, onSelectEnclave } = props
 
   return (
     <Stack gap={3} alignItems="center">
@@ -41,6 +43,11 @@ export default function CreateTaskCategoryPicker(
           title={COMPUTE_TASK_CATEGORY_TITLE}
           Illustration={ComputeIllustration}
           onClick={onSelectCompute}
+        />
+        <TaskCategoryCard
+          title={ENCLAVE_TASK_CATEGORY_TITLE}
+          Illustration={ComputeIllustration}
+          onClick={onSelectEnclave}
         />
       </Stack>
     </Stack>

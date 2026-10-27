@@ -1,10 +1,15 @@
 import { createMockTaskBundle } from '@/mocks/curation/mockCurationTask'
-import { TaskBundle } from '@sage-bionetworks/synapse-client'
+import { CurationTaskProperties, TaskBundle } from '@sage-bionetworks/synapse-client'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useNavigate } from 'react-router'
 import { beforeEach } from 'vitest'
 import MetadataTaskTableActionCell from './MetadataTaskTableActionCell'
+import {
+  getComputePageHref,
+  OPEN_IN_COMPUTE_BUTTON_TEXT,
+} from '@/features/compute/computePageHref'
+import { INTERACTIVE_SESSION_PROPERTIES_CONCRETE_TYPE } from '@/synapse-queries/curation/task/useInteractiveSession'
 import useOpenCuratorFromTaskButton from '../hooks/useOpenCuratorButton'
 
 vi.mock('react-router')
@@ -104,5 +109,23 @@ describe('MetadataTaskTableActionCell', () => {
     renderComponent()
 
     expect(screen.getByRole('button', { name: /open curator/i })).toBeDisabled()
+  })
+
+  it('opens an enclave session task on its Compute page, with no Edit or Open Curator', async () => {
+    const user = userEvent.setup()
+    const taskBundle = createMockTaskBundle({
+      taskProperties: {
+        concreteType: INTERACTIVE_SESSION_PROPERTIES_CONCRETE_TYPE,
+      } as unknown as CurationTaskProperties,
+    })
+    const assign = vi.spyOn(window.location, 'assign')
+    renderComponent({ taskBundle, canEdit: true })
+
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /open curator/i })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: OPEN_IN_COMPUTE_BUTTON_TEXT }))
+
+    expect(assign).toHaveBeenCalledWith(getComputePageHref(taskBundle.task!.taskId!))
+    expect(mockUseOpenCuratorFromTaskButton).not.toHaveBeenCalled()
   })
 })

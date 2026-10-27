@@ -1,11 +1,13 @@
 import { displayToast } from '@/components'
 import { getComputeTaskConcreteType } from '@/features/entity/metadata-task/utils/types'
+import { getInteractiveSessionProperties } from '@/synapse-queries/curation/task/useInteractiveSession'
 import { TaskBundle } from '@sage-bionetworks/synapse-client'
 import CurationTaskCardLayout, {
   deriveCardFields,
 } from './CurationTaskCardLayout'
 import ExecutableTaskCard from './ExecutableTaskCard'
 import GridTaskCard from './GridTaskCard'
+import InteractiveSessionTaskCard from './InteractiveSessionTaskCard'
 import NextStepButton from './NextStepButton'
 import styles from './CurationTaskCard.module.scss'
 
@@ -15,8 +17,8 @@ export type CurationTaskCardProps = {
 
 /**
  * Card component for displaying a curation task on the curator dashboard. Dispatches to the card
- * variant appropriate for the task's type: an executable (Compute Data) task, a grid-supported
- * (Curate Data) task, or a fallback for unrecognized types.
+ * variant appropriate for the task's type: an interactive session (enclave) task, an executable (Compute Data) task,
+ * a grid-supported (Curate Data) task, or a fallback for unrecognized types.
  */
 export default function CurationTaskCard(props: CurationTaskCardProps) {
   const { taskBundle } = props
@@ -26,6 +28,10 @@ export default function CurationTaskCard(props: CurationTaskCardProps) {
   }
 
   const concreteType = taskBundle.task.taskProperties?.concreteType
+
+  if (getInteractiveSessionProperties(taskBundle.task.taskProperties)) {
+    return <InteractiveSessionTaskCard taskBundle={taskBundle} />
+  }
 
   if (getComputeTaskConcreteType(taskBundle.task.taskProperties)) {
     return <ExecutableTaskCard taskBundle={taskBundle} />

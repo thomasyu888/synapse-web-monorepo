@@ -1,7 +1,9 @@
 import {
   CREATE_COMPUTE_TASK_PAGE_TITLE,
   CREATE_CURATE_TASK_PAGE_TITLE,
+  CREATE_ENCLAVE_TASK_PAGE_TITLE,
   FILL_IN_COMPUTE_TASK_DETAILS_DESCRIPTION,
+  FILL_IN_ENCLAVE_TASK_DETAILS_DESCRIPTION,
   FILL_IN_CURATE_TASK_DETAILS_DESCRIPTION,
   BACK_TO_ALL_TASKS_LABEL,
 } from '../utils/constants'
@@ -18,6 +20,8 @@ import ComputeTaskForm from './ComputeTaskForm'
 import CreateTaskCategoryPicker from './CreateTaskCategoryPicker'
 import CreateTaskConfirmation from './CreateTaskConfirmation'
 import CurateTaskForm from './CurateTaskForm'
+import EnclaveTaskForm from './EnclaveTaskForm'
+import { getComputePageHref } from '@/features/compute/computePageHref'
 
 export type GetCurationTaskFlowRoutesOptions = {
   /**
@@ -72,6 +76,7 @@ function CategoryPickerRoute() {
     <CreateTaskCategoryPicker
       onSelectCompute={() => void navigate('compute')}
       onSelectCurate={() => void navigate('curate')}
+      onSelectEnclave={() => void navigate('enclave')}
     />
   )
 }
@@ -104,6 +109,21 @@ function CurateFormRoute(props: { projectId?: string; exitPath: string }) {
   )
 }
 
+function EnclaveFormRoute(props: { projectId?: string; exitPath: string }) {
+  const navigate = useNavigate()
+  return (
+    <EnclaveTaskForm
+      projectId={props.projectId}
+      pageTitle={CREATE_ENCLAVE_TASK_PAGE_TITLE}
+      pageDescription={FILL_IN_ENCLAVE_TASK_DETAILS_DESCRIPTION}
+      onBack={() => void navigate(-1)}
+      onExit={() => void navigate(props.exitPath)}
+      // The session is started and used on the task's Compute page.
+      onCreated={task => window.location.assign(getComputePageHref(task.taskId!))}
+    />
+  )
+}
+
 function ConfirmationRoute(props: { exitPath: string }) {
   const { taskId } = useParams<{ taskId: string }>()
   const navigate = useNavigate()
@@ -121,7 +141,7 @@ function ConfirmationRoute(props: { exitPath: string }) {
 
 /**
  * Builds the route objects for the 3-step "Create New Task" wizard: category picker -> compute/curate
- * form -> confirmation. The task itself is created on the step-2-to-step-3 transition (see
+ * form -> confirmation. An enclave session task skips the confirmation and opens on its Compute page. The task itself is created on the step-2-to-step-3 transition (see
  * `ComputeTaskForm`/`CurateTaskForm`'s `onCreated`).
  */
 export function getCurationTaskFlowRoutes(
@@ -149,6 +169,10 @@ export function getCurationTaskFlowRoutes(
     {
       path: 'curate',
       element: <CurateFormRoute projectId={projectId} exitPath={exitPath} />,
+    },
+    {
+      path: 'enclave',
+      element: <EnclaveFormRoute projectId={projectId} exitPath={exitPath} />,
     },
   ]
 }

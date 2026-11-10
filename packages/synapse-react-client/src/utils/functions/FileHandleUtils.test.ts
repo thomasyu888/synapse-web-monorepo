@@ -39,6 +39,8 @@ import {
   getFileHandleStorageInfo,
   getStorageLocationName,
   getUploadDestinationString,
+  CLOUDFLARE_R2_STORAGE_PREFIX,
+  isCloudflareR2Endpoint,
 } from './FileHandleUtils'
 
 describe('File Handle Utils', () => {
@@ -344,6 +346,28 @@ describe('File Handle Utils', () => {
       }
       const result = getUploadDestinationString(uploadDestination)
       expect(result).toEqual('s3://myBucket/myKey')
+    })
+
+    it('Returns a Cloudflare R2 label for an ExternalS3UploadDestination with an R2 endpoint', () => {
+      const uploadDestination: ExternalS3UploadDestination = {
+        ...mockExternalS3UploadDestination,
+        bucket: 'myBucket',
+        baseKey: 'myKey',
+        endpointUrl:
+          'https://c6f0385635f2d7cd6dbab33653562fee.us.r2.cloudflarestorage.com',
+      }
+      const result = getUploadDestinationString(uploadDestination)
+      expect(result).toEqual(`${CLOUDFLARE_R2_STORAGE_PREFIX}myBucket/myKey`)
+    })
+
+    it.each([
+      ['https://c6f0385635f2d7cd6dbab33653562fee.r2.cloudflarestorage.com', true],
+      ['https://c6f0385635f2d7cd6dbab33653562fee.eu.r2.cloudflarestorage.com/', true],
+      ['https://s3.amazonaws.com', false],
+      ['https://c6f0385635f2d7cd6dbab33653562fee.r2.cloudflarestorage.com.example.org', false],
+      [undefined, false],
+    ])('isCloudflareR2Endpoint(%s) is %s', (endpointUrl, expected) => {
+      expect(isCloudflareR2Endpoint(endpointUrl)).toBe(expected)
     })
 
     it('Returns a gs path for an ExternalGoogleCloudUploadDestination', () => {

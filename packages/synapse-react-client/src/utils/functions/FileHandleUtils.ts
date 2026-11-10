@@ -20,6 +20,15 @@ import {
 } from '@sage-bionetworks/synapse-types'
 
 const SYNAPSE_STORAGE = 'Synapse Storage'
+export const CLOUDFLARE_R2_STORAGE_PREFIX = 'Cloudflare R2: '
+
+// Synapse offers a Cloudflare R2 bucket as an external S3 destination whose endpoint is the R2 account's.
+const CLOUDFLARE_R2_ENDPOINT =
+  /^https:\/\/[0-9a-f]{32}(\.[a-z0-9-]+)?\.r2\.cloudflarestorage\.com\/?$/i
+
+export function isCloudflareR2Endpoint(endpointUrl?: string): boolean {
+  return endpointUrl != null && CLOUDFLARE_R2_ENDPOINT.test(endpointUrl)
+}
 
 type FileHandleStorageInfo =
   | {
@@ -146,7 +155,11 @@ export function getUploadDestinationString(
         break
       case 'org.sagebionetworks.repo.model.file.ExternalS3UploadDestination':
         uploadDestinationString =
-          's3://' +
+          (isCloudflareR2Endpoint(
+            (uploadDestination as ExternalS3UploadDestination).endpointUrl,
+          )
+            ? CLOUDFLARE_R2_STORAGE_PREFIX
+            : 's3://') +
           (uploadDestination as ExternalS3UploadDestination).bucket +
           '/'
         if (

@@ -94,6 +94,15 @@ import {
   WIKI_OBJECT_TYPE,
   WIKI_PAGE,
   WIKI_PAGE_ID,
+  GAAS_REGISTER,
+  GAAS_REQUEST,
+  GAAS_REQUEST_AUDIT,
+  GAAS_REQUEST_CANCELLATION,
+  GAAS_REQUEST_COORDINATION,
+  GAAS_REQUEST_EVALUATION,
+  GAAS_REQUEST_ID,
+  GAAS_REQUEST_LIST,
+  GAAS_REQUEST_VOTE,
 } from '@/utils/APIConstants'
 import appendFinalQueryParamKey from '@/utils/appendFinalQueryParamKey'
 import {
@@ -123,6 +132,14 @@ import {
 } from '@sage-bionetworks/synapse-client'
 import { TwoFactorAuthErrorResponse } from '@sage-bionetworks/synapse-client/generated/models/TwoFactorAuthErrorResponse'
 import {
+  CoordinatorActionRequest,
+  DacVoteRequest,
+  DataUseRegisterPage,
+  GaasAuditEventPage,
+  GaasRequestListRequest,
+  GaasRequestPage,
+  PolicyEvaluation,
+  UnifiedAccessRequest,
   ACCESS_TYPE,
   AccessApproval,
   AccessApprovalSearchRequest,
@@ -5782,5 +5799,133 @@ export const getProjectStorageUsage = (
     accessToken,
     BackendDestinationEnum.REPO_ENDPOINT,
     { signal },
+  )
+}
+
+const withNextPageToken = (url: string, nextPageToken?: string) =>
+  nextPageToken
+    ? `${url}?nextPageToken=${encodeURIComponent(nextPageToken)}`
+    : url
+
+/**
+ * Runs the GaaS policy engine on a unified access request without submitting it.
+ */
+export const evaluateGaasRequest = (
+  request: UnifiedAccessRequest,
+  accessToken: string | undefined,
+): Promise<PolicyEvaluation> => {
+  return doPost<PolicyEvaluation>(
+    GAAS_REQUEST_EVALUATION,
+    request,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+/**
+ * Submits a unified access request: one application for every access requirement on the selected data.
+ */
+export const submitGaasRequest = (
+  request: UnifiedAccessRequest,
+  accessToken: string | undefined,
+): Promise<UnifiedAccessRequest> => {
+  return doPost<UnifiedAccessRequest>(
+    GAAS_REQUEST,
+    request,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+export const getGaasRequest = (
+  id: string,
+  accessToken: string | undefined,
+): Promise<UnifiedAccessRequest> => {
+  return doGet<UnifiedAccessRequest>(
+    GAAS_REQUEST_ID(id),
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+export const cancelGaasRequest = (
+  id: string,
+  accessToken: string | undefined,
+): Promise<UnifiedAccessRequest> => {
+  return doPost<UnifiedAccessRequest>(
+    GAAS_REQUEST_CANCELLATION(id),
+    undefined,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+export const listGaasRequests = (
+  request: GaasRequestListRequest,
+  accessToken: string | undefined,
+): Promise<GaasRequestPage> => {
+  return doPost<GaasRequestPage>(
+    GAAS_REQUEST_LIST,
+    request,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+/**
+ * Casts a DAC member's vote on one part of a unified access request.
+ */
+export const voteOnGaasRequest = (
+  id: string,
+  vote: DacVoteRequest,
+  accessToken: string | undefined,
+): Promise<UnifiedAccessRequest> => {
+  return doPost<UnifiedAccessRequest>(
+    GAAS_REQUEST_VOTE(id),
+    vote,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+/**
+ * The Central Coordinator's action (ACT only) on a held or escalated unified access request.
+ */
+export const coordinateGaasRequest = (
+  id: string,
+  action: CoordinatorActionRequest,
+  accessToken: string | undefined,
+): Promise<UnifiedAccessRequest> => {
+  return doPost<UnifiedAccessRequest>(
+    GAAS_REQUEST_COORDINATION(id),
+    action,
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+export const getGaasRequestAudit = (
+  id: string,
+  nextPageToken: string | undefined,
+  accessToken: string | undefined,
+): Promise<GaasAuditEventPage> => {
+  return doGet<GaasAuditEventPage>(
+    withNextPageToken(GAAS_REQUEST_AUDIT(id), nextPageToken),
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
+  )
+}
+
+/**
+ * The public Data Use Register: decided unified access requests. Anonymous callers are allowed.
+ */
+export const getDataUseRegister = (
+  nextPageToken: string | undefined,
+  accessToken: string | undefined,
+): Promise<DataUseRegisterPage> => {
+  return doGet<DataUseRegisterPage>(
+    withNextPageToken(GAAS_REGISTER, nextPageToken),
+    accessToken,
+    BackendDestinationEnum.REPO_ENDPOINT,
   )
 }

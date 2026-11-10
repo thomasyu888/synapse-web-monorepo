@@ -1,3 +1,8 @@
+import { getFileColumnModelId } from '@/components/SynapseTable/SynapseTableUtils'
+import { RequestAccessWithOneApplicationButton } from '@/features/gaas/RequestAccessWithOneApplicationButton'
+import SynapseClient from '@/synapse-client'
+import { SynapseConstants } from '@/utils'
+import { useSynapseContext } from '@/utils/context/SynapseContext'
 import { Box, Typography } from '@mui/material'
 import {
   ColumnModel,
@@ -19,6 +24,39 @@ export type TableQueryActionsRequiredProps = {
   onNumberOfRequiredActionsChanged?: (actionsRequired: number) => void
 }
 
+/** Caps how many rows go into one unified access request. */
+const MAX_UNIFIED_REQUEST_ROWS = 1000
+
+/**
+ * Collects the entity IDs in the table's file column, with the user's current facet selections and filters applied.
+ */
+async function getTableQueryEntityIds(
+  queryBundleRequest: QueryBundleRequest,
+  fileColumn: ColumnModel,
+  accessToken: string | undefined,
+) {
+  const { selectedFacets, additionalFilters } = queryBundleRequest.query
+  const result = await SynapseClient.getQueryTableResults(
+    {
+      ...queryBundleRequest,
+      partMask: SynapseConstants.BUNDLE_MASK_QUERY_RESULTS,
+      query: {
+        sql: `SELECT "${fileColumn.name}" FROM ${queryBundleRequest.entityId}`,
+        selectedFacets,
+        additionalFilters,
+        offset: 0,
+        limit: MAX_UNIFIED_REQUEST_ROWS,
+      },
+    },
+    accessToken,
+  )
+  const ids =
+    result.queryResult?.queryResults.rows.map(row => row.values[0]) ?? []
+  return Array.from(
+    new Set(ids.filter((id): id is string => typeof id === 'string' && id !== '')),
+  )
+}
+
 /**
  * Displays an interactive list of actions required to take for a user to gain access to Synapse entities referenced in
  * a table query.
@@ -31,6 +69,9 @@ export function TableQueryActionsRequired(
     columnModels,
     onNumberOfRequiredActionsChanged = noop,
   } = props
+  const { accessToken } = useSynapseContext()
+  const fileColumnId = getFileColumnModelId(columnModels)
+  const fileColumn = columnModels.find(cm => cm.id === fileColumnId)
 
   // This component will track all completed actions, based on which actions are omitted from the ActionsRequiredResponse
   // as the user performs required tasks
@@ -66,6 +107,15 @@ export function TableQueryActionsRequired(
         >
           All requirements have been met. No actions are required.
         </Typography>
+      )}
+      {fileColumn && allCompleteAndIncompleteActions.length > 0 && (
+        <Box>
+          <RequestAccessWithOneApplicationButton
+            getEntityIds={() =>
+              getTableQueryEntityIds(queryBundleRequest, fileColumn, accessToken)
+            }
+          />
+        </Box>
       )}
       {allCompleteAndIncompleteActions.map((item, index) => (
         <ActionRequiredListItem

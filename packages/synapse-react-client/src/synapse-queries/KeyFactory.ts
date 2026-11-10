@@ -44,6 +44,7 @@ import {
   FavoriteSortDirection,
   FileHandle,
   FileHandleAssociation,
+  GaasRequestListFilter,
   GetEvaluationParameters,
   GetProjectsParameters,
   ObjectType,
@@ -1287,5 +1288,29 @@ export class KeyFactory {
       organizationName,
       schemaName,
     )
+  }
+
+  public getGaasQueryKey() {
+    return this.getKey('gaas')
+  }
+
+  public getGaasRequestQueryKey(id: string) {
+    return this.getKey('gaas', 'request', id)
+  }
+
+  public getGaasRequestListQueryKey(filter: GaasRequestListFilter) {
+    return this.getKey('gaas', 'request', 'list', filter)
+  }
+
+  public getGaasRequestAuditQueryKey(id: string) {
+    return this.getKey('gaas', 'request', id, 'audit')
+  }
+
+  public getGaasPolicyEvaluationQueryKey(request: unknown) {
+    return this.getKey('gaas', 'evaluation', request)
+  }
+
+  public getDataUseRegisterQueryKey() {
+    return this.getKey('gaas', 'register')
   }
 }

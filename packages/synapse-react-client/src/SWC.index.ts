@@ -149,6 +149,12 @@ const SynapseComponents = {
   FullWidthAlert: lazy(
     () => import('./components/FullWidthAlert/FullWidthAlert'),
   ),
+  GaasDashboard: lazy(() => import('./features/gaas/GaasDashboard')),
+  GaasDataUseRegister: lazy(() =>
+    import('./features/gaas/DataUseRegister').then(m => ({
+      default: m.DataUseRegister,
+    })),
+  ),
   GoogleAnalytics: lazy(
     () => import('./components/GoogleAnalytics/GoogleAnalytics'),
   ),

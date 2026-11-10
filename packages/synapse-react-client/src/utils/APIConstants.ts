@@ -271,3 +271,16 @@ export const WIKI_PAGE_ID = (
 export const SESSION_ACCESS_TOKEN = `${AUTH}/sessionAccessToken`
 export const ALL_USER_SESSION_TOKENS = (targetUserId: string | number) =>
   `${AUTH}/user/${targetUserId}/sessionAccessToken/all`
+
+export const GAAS = `${REPO}/gaas`
+export const GAAS_REQUEST = `${GAAS}/request`
+export const GAAS_REQUEST_EVALUATION = `${GAAS_REQUEST}/evaluation`
+export const GAAS_REQUEST_LIST = `${GAAS_REQUEST}/list`
+export const GAAS_REQUEST_ID = (id: string) => `${GAAS_REQUEST}/${id}`
+export const GAAS_REQUEST_CANCELLATION = (id: string) =>
+  `${GAAS_REQUEST_ID(id)}/cancellation`
+export const GAAS_REQUEST_VOTE = (id: string) => `${GAAS_REQUEST_ID(id)}/vote`
+export const GAAS_REQUEST_COORDINATION = (id: string) =>
+  `${GAAS_REQUEST_ID(id)}/coordination`
+export const GAAS_REQUEST_AUDIT = (id: string) => `${GAAS_REQUEST_ID(id)}/audit`
+export const GAAS_REGISTER = `${GAAS}/register`
